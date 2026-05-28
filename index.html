@@ -74,7 +74,7 @@ table.ptbl code{font-size:.85em}
 
 <h2>What this is</h2>
 <p>Repo2RLEnv turns any GitHub repo into a verifiable RL training/eval dataset, emitted in <a href="https://github.com/harbor-framework/harbor">Harbor</a>'s task spec. Harbor's built-in runners are <code>{docker, modal, daytona, e2b, runloop}</code>. Crabbox is a separate control plane that fronts ~15 more providers — AWS, Azure, GCP, Hetzner, Proxmox, <strong>islo.dev</strong>, …</p>
-<p>This is the small adapter (one Python file, ~250 lines) that runs Repo2RLEnv's <code>pr_diff</code> tasks on any crabbox provider. Source: <a href="https://github.com/huggingface/Repo2RLEnv/blob/main/examples/crabbox-islo/runner.py"><code>examples/crabbox-islo/runner.py</code></a> in PR #53.</p>
+<p>This is the small adapter (one Python file, ~250 lines) that runs Repo2RLEnv's <code>pr_diff</code> tasks on any crabbox provider. Source: <a href="https://github.com/huggingface/Repo2RLEnv/blob/main/examples/crabbox/runner.py"><code>examples/crabbox/runner.py</code></a> in PR #53.</p>
 
 <h2>Pipeline</h2>
 <div class="arch">  <span class="lab">host</span>                                                <span class="lab">islo.dev sandbox</span>
@@ -103,7 +103,7 @@ table.ptbl code{font-size:.85em}
 <span class="cmt"># 161 pr_diff tasks across ripgrep · click · chalk · axios · ...</span></pre>
 
 <h3>2 · score the oracle diff (sanity check)</h3>
-<pre class="cmd">python3 examples/crabbox-islo/runner.py ./datasets/pr-diff/pallets__click-3466</pre>
+<pre class="cmd">python3 examples/crabbox/runner.py ./datasets/pr-diff/pallets__click-3466</pre>
 <pre class="out">[crabbox] default/pallets__click-3466 provider=islo image=python:3.12-slim
 <span class="dim">leased isb_crabbox-tmp-...-cafe98 slug=violet-crayfish provider=islo</span>
 <span class="dim">sync candidate: 5 files, 24.5 KiB  ·  sync complete in 1.014s</span>
@@ -126,7 +126,7 @@ table.ptbl code{font-size:.85em}
 
 <h3>3 · score an empty agent diff (agent gave up)</h3>
 <pre class="cmd">: <span class="dim">&gt; /tmp/empty.diff</span>                              <span class="cmt"># empty patch</span>
-python3 examples/crabbox-islo/runner.py ./datasets/pr-diff/pallets__click-3466 \
+python3 examples/crabbox/runner.py ./datasets/pr-diff/pallets__click-3466 \
   <span class="flag">--agent-patch</span> /tmp/empty.diff \
   <span class="flag">--reward-out</span>  /tmp/empty-reward.json</pre>
 <pre class="out"><span class="bad">{
@@ -142,7 +142,7 @@ python3 examples/crabbox-islo/runner.py ./datasets/pr-diff/pallets__click-3466 \
 }</span></pre>
 
 <h3>4 · whole dataset, parallel (3 tasks, j=3)</h3>
-<pre class="cmd">python3 examples/crabbox-islo/runner.py <span class="flag">--all</span> ./datasets/pr-diff <span class="flag">-j</span> 3</pre>
+<pre class="cmd">python3 examples/crabbox/runner.py <span class="flag">--all</span> ./datasets/pr-diff <span class="flag">-j</span> 3</pre>
 <pre class="out"><span class="dim">[batch] 3 tasks; j=3; provider=islo</span>
 [batch] pallets__click-3444                  reward=<span class="ok">   1.0</span>  ok
 [batch] pallets__click-3466                  reward=<span class="ok">   1.0</span>  ok
@@ -187,9 +187,9 @@ python3 runner.py &lt;task&gt; <span class="flag">--provider</span> local-contai
   needs a pre-baked image with python+git; not handled here.</span></pre>
 
 <h2>Tests</h2>
-<p><code>tests/test_examples_crabbox_islo.py</code> exercises the wrapper in two layers:</p>
+<p><code>tests/test_examples_crabbox.py</code> exercises the wrapper in two layers:</p>
 
-<pre class="out">$ uv run pytest tests/test_examples_crabbox_islo.py -v
+<pre class="out">$ uv run pytest tests/test_examples_crabbox.py -v
 <span class="ok">test_provider_config_covers_known_container_providers              PASSED
 test_unsupported_provider_raises_with_helpful_message              PASSED
 test_task_load_extracts_metadata                                   PASSED
@@ -211,7 +211,7 @@ test_run_task_raises_when_no_sentinel_in_stdout                    PASSED</span>
 
 <p><strong>Unit tests</strong> (always run in CI) monkeypatch <code>subprocess.run</code> and assert the exact <code>crabbox</code> argv built for every supported provider — no network, no binary. <strong>The live islo smoke</strong> pulls <code>pallets__click-3466</code> from the public reference dataset, scores the oracle, and asserts <code>final_reward == 1.0</code>. It runs only when both <code>ISLO_API_KEY</code> is set and <code>crabbox</code> is on <code>PATH</code>:</p>
 
-<pre class="cmd">ISLO_API_KEY=ak_... uv run pytest tests/test_examples_crabbox_islo.py \
+<pre class="cmd">ISLO_API_KEY=ak_... uv run pytest tests/test_examples_crabbox.py \
   -k live_islo -v</pre>
 
 <div class="note"><strong>Scope.</strong> Supported today: every <code>pr_diff</code> task in <a href="https://huggingface.co/datasets/AdithyaSK/repo2rlenv-pr-diff"><code>AdithyaSK/repo2rlenv-pr-diff</code></a> (161 tasks). Pipelines like <code>pr_runtime</code> and <code>commit_runtime</code> build a per-repo Docker image at <code>repo2rlenv bootstrap</code> time and need docker-in-docker — wiring those through crabbox is a follow-up.</div>
@@ -221,7 +221,7 @@ test_run_task_raises_when_no_sentinel_in_stdout                    PASSED</span>
 
 <footer>
   <a href="https://github.com/huggingface/Repo2RLEnv/pull/53">PR #53</a>
-  <a href="https://github.com/huggingface/Repo2RLEnv/blob/main/examples/crabbox-islo/runner.py">runner.py</a>
+  <a href="https://github.com/huggingface/Repo2RLEnv/blob/main/examples/crabbox/runner.py">runner.py</a>
   <a href="https://github.com/huggingface/Repo2RLEnv">huggingface/Repo2RLEnv</a>
   <a href="https://github.com/openclaw/crabbox">openclaw/crabbox</a>
   <a href="https://github.com/harbor-framework/harbor">harbor-framework/harbor</a>

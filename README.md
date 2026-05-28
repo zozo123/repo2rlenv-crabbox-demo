@@ -12,4 +12,4 @@ The site shows three verified runs on a live islo.dev sandbox:
 - 3-task batch (j=3) → all 1.0 in ~57 s wall
 
 Source of the wrapper lives in the PR:
-[`examples/crabbox-islo/runner.py`](https://github.com/huggingface/Repo2RLEnv/blob/feat/crabbox-islo-example/examples/crabbox-islo/runner.py).
+[`examples/crabbox/runner.py`](https://github.com/huggingface/Repo2RLEnv/blob/feat/crabbox-islo-example/examples/crabbox/runner.py).
