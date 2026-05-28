@@ -49,6 +49,13 @@ footer a{color:var(--soft)} footer a:hover{color:var(--green)}
 .note{border-left:2px solid var(--amber);padding:8px 14px;background:rgba(230,168,0,.04);font-size:.78rem;color:var(--soft);margin:12px 0;border-radius:0 2px 2px 0}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media (max-width:720px){.row{grid-template-columns:1fr}}
+table.ptbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:.78rem;background:var(--panel);border:1px solid var(--line);border-radius:3px;overflow:hidden}
+table.ptbl th,table.ptbl td{padding:9px 14px;text-align:left;border-bottom:1px solid var(--line)}
+table.ptbl th{color:var(--soft);font-weight:500;font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;background:rgba(255,255,255,.02)}
+table.ptbl tr:last-child td{border-bottom:none}
+table.ptbl td:nth-child(4),table.ptbl td:nth-child(5),table.ptbl th:nth-child(4),table.ptbl th:nth-child(5){text-align:center;color:var(--green);font-weight:700;width:60px}
+table.ptbl td.ok{color:var(--green)}
+table.ptbl code{font-size:.85em}
 </style>
 </head>
 <body>
@@ -150,15 +157,64 @@ chalk__chalk-541,<span class="num">1.0</span>,ok
 pallets__click-3444,<span class="num">1.0</span>,ok
 pallets__click-3466,<span class="num">1.0</span>,ok</pre>
 
-<h2>One flag, many providers</h2>
-<p>The wrapper is provider-agnostic. The same script runs on AWS, Hetzner, Daytona, or any other crabbox target:</p>
-<pre class="cmd">python3 runner.py &lt;task&gt; <span class="flag">--provider</span> islo     <span class="cmt"># default</span>
-python3 runner.py &lt;task&gt; <span class="flag">--provider</span> aws      <span class="cmt"># brokered EC2 Linux</span>
-python3 runner.py &lt;task&gt; <span class="flag">--provider</span> hetzner  <span class="cmt"># cheap & fast Linux VMs</span>
-python3 runner.py &lt;task&gt; <span class="flag">--provider</span> daytona  <span class="cmt"># SSH-gateway sandboxes</span>
-python3 runner.py &lt;task&gt; <span class="flag">--provider</span> local-container  <span class="cmt"># laptop Docker — no cloud</span></pre>
+<h2>One flag, eight providers</h2>
+<p>Each crabbox provider names its <em>image</em> flag differently — islo and modal use <code>--&lt;p&gt;-image</code>, e2b uses <code>--e2b-template</code>, daytona uses <code>--daytona-snapshot</code>, local-container uses <code>--local-container-image</code> with a <code>-work-root</code>. The wrapper carries an explicit <code>PROVIDER_CONFIG</code> table so the right flag is selected per provider:</p>
 
-<div class="note"><strong>Scope.</strong> Supported today: every task in <a href="https://huggingface.co/datasets/AdithyaSK/repo2rlenv-pr-diff"><code>AdithyaSK/repo2rlenv-pr-diff</code></a> (161 tasks). Pipelines like <code>pr_runtime</code> and <code>commit_runtime</code> build a per-repo Docker image at <code>repo2rlenv bootstrap</code> time and need docker-in-docker — wiring those through crabbox is a follow-up.</div>
+<table class="ptbl">
+  <thead><tr><th><code>--provider</code></th><th>sandbox kind</th><th>image flag</th><th>unit</th><th>live</th></tr></thead>
+  <tbody>
+    <tr><td><code>islo</code></td><td>islo.dev sandbox</td><td><code>--islo-image</code></td><td class="ok">✓</td><td class="ok">✓</td></tr>
+    <tr><td><code>e2b</code></td><td>E2B template</td><td><code>--e2b-template</code></td><td class="ok">✓</td><td>—</td></tr>
+    <tr><td><code>modal</code></td><td>Modal Image</td><td><code>--modal-image</code></td><td class="ok">✓</td><td>—</td></tr>
+    <tr><td><code>daytona</code></td><td>Daytona snapshot</td><td><code>--daytona-snapshot</code></td><td class="ok">✓</td><td>—</td></tr>
+    <tr><td><code>local-container</code></td><td>local Docker</td><td><code>--local-container-image</code></td><td class="ok">✓</td><td>—</td></tr>
+    <tr><td><code>docker</code></td><td>alias for local-container</td><td><code>--local-container-image</code></td><td class="ok">✓</td><td>—</td></tr>
+    <tr><td><code>namespace-devbox</code></td><td>Namespace Devbox</td><td><code>--namespace-image</code></td><td class="ok">✓</td><td>—</td></tr>
+    <tr><td><code>tensorlake</code></td><td>Tensorlake</td><td><code>--tensorlake-image</code></td><td class="ok">✓</td><td>—</td></tr>
+  </tbody>
+</table>
+
+<pre class="cmd">python3 runner.py &lt;task&gt; <span class="flag">--provider</span> islo            <span class="cmt"># default · live-verified</span>
+python3 runner.py &lt;task&gt; <span class="flag">--provider</span> e2b             <span class="cmt"># --e2b-template instead of --e2b-image</span>
+python3 runner.py &lt;task&gt; <span class="flag">--provider</span> daytona         <span class="cmt"># --daytona-snapshot, --daytona-work-root</span>
+python3 runner.py &lt;task&gt; <span class="flag">--provider</span> local-container <span class="cmt"># laptop Docker — no cloud</span></pre>
+
+<p>Pass an unsupported provider and the wrapper fails fast with a list of supported names and a note on why VM providers (aws / hetzner / gcp / …) need a separate adapter:</p>
+<pre class="out"><span class="bad">ValueError: provider 'aws' not supported by this example.
+  Container-style providers: daytona, docker, e2b, islo, local-container,
+                             modal, namespace-devbox, tensorlake.
+  For VM providers (aws, azure, gcp, hetzner, proxmox, ssh) the sandbox
+  needs a pre-baked image with python+git; not handled here.</span></pre>
+
+<h2>Tests</h2>
+<p><code>tests/test_examples_crabbox_islo.py</code> exercises the wrapper in two layers:</p>
+
+<pre class="out">$ uv run pytest tests/test_examples_crabbox_islo.py -v
+<span class="ok">test_provider_config_covers_known_container_providers              PASSED
+test_unsupported_provider_raises_with_helpful_message              PASSED
+test_task_load_extracts_metadata                                   PASSED
+test_extract_verifier_recovers_three_files                         PASSED
+test_run_task_builds_correct_command_for_each_provider[islo]       PASSED
+test_run_task_builds_correct_command_for_each_provider[e2b]        PASSED
+test_run_task_builds_correct_command_for_each_provider[modal]      PASSED
+test_run_task_builds_correct_command_for_each_provider[daytona]    PASSED
+test_run_task_builds_correct_command_for_each_provider[local-…]    PASSED
+test_run_task_builds_correct_command_for_each_provider[docker]     PASSED
+test_run_task_builds_correct_command_for_each_provider[namespace…] PASSED
+test_run_task_builds_correct_command_for_each_provider[tensorlake] PASSED
+test_run_task_rejects_unsupported_provider                         PASSED
+test_run_task_writes_keep_flag_when_requested                      PASSED
+test_run_task_raises_when_no_sentinel_in_stdout                    PASSED</span>
+<span class="dim">test_live_islo_oracle_scores_one                                   SKIPPED
+  (ISLO_API_KEY not set — live islo.dev smoke is opt-in)</span>
+<span class="ok">======================== 15 passed, 1 skipped in 1.07s ========================</span></pre>
+
+<p><strong>Unit tests</strong> (always run in CI) monkeypatch <code>subprocess.run</code> and assert the exact <code>crabbox</code> argv built for every supported provider — no network, no binary. <strong>The live islo smoke</strong> pulls <code>pallets__click-3466</code> from the public reference dataset, scores the oracle, and asserts <code>final_reward == 1.0</code>. It runs only when both <code>ISLO_API_KEY</code> is set and <code>crabbox</code> is on <code>PATH</code>:</p>
+
+<pre class="cmd">ISLO_API_KEY=ak_... uv run pytest tests/test_examples_crabbox_islo.py \
+  -k live_islo -v</pre>
+
+<div class="note"><strong>Scope.</strong> Supported today: every <code>pr_diff</code> task in <a href="https://huggingface.co/datasets/AdithyaSK/repo2rlenv-pr-diff"><code>AdithyaSK/repo2rlenv-pr-diff</code></a> (161 tasks). Pipelines like <code>pr_runtime</code> and <code>commit_runtime</code> build a per-repo Docker image at <code>repo2rlenv bootstrap</code> time and need docker-in-docker — wiring those through crabbox is a follow-up.</div>
 
 <h2>Why this matters</h2>
 <p>Repo2RLEnv's stated focus is <em>synthesis</em>; running is delegated to Harbor's stack. Crabbox extends the runtime reach without modifying either project — Harbor for the in-stack runners, crabbox for the providers Harbor doesn't ship a backend for. Generate once, run anywhere.</p>
