@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Repo2RLEnv × crabbox × islo.dev</title>
+<meta name="description" content="Score Repo2RLEnv pr_diff tasks on a remote islo.dev sandbox via crabbox — ~50s end-to-end per task.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+:root{
+  --bg:#050508; --panel:#0a0a0e; --line:rgba(255,255,255,.06);
+  --fg:#b0b8c0; --dim:#3a3f48; --soft:#6a7280;
+  --green:#00e05a; --amber:#e6a800; --cyan:#0cf; --mag:#c09; --red:#e63946;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--fg);font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;line-height:1.6}
+body{padding:48px 24px 96px;max-width:980px;margin:0 auto}
+a{color:var(--cyan);text-decoration:none;border-bottom:1px dotted var(--cyan)}
+a:hover{color:var(--green);border-color:var(--green)}
+header{margin-bottom:48px;border-left:2px solid var(--green);padding:6px 0 6px 20px}
+h1{font-size:1.6rem;font-weight:700;color:#fff;letter-spacing:-.01em}
+h1 .x{color:var(--dim);margin:0 .35em;font-weight:400}
+h2{font-size:.95rem;font-weight:700;color:var(--green);letter-spacing:.04em;text-transform:uppercase;margin:48px 0 16px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+h3{font-size:.85rem;font-weight:700;color:var(--amber);letter-spacing:.06em;text-transform:uppercase;margin:24px 0 10px}
+p{margin-bottom:14px;max-width:78ch}
+.tagline{color:var(--soft);font-size:.85rem;margin-top:8px;max-width:78ch}
+.badges{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;font-size:.7rem}
+.badge{display:inline-block;padding:3px 8px;border:1px solid var(--dim);color:var(--soft);border-radius:2px;letter-spacing:.04em}
+.badge.live{border-color:var(--green);color:var(--green)}
+pre{background:var(--panel);border:1px solid var(--line);border-left:2px solid var(--green);padding:14px 18px;font-size:.78rem;line-height:1.55;overflow-x:auto;margin:14px 0;border-radius:0 3px 3px 0}
+pre.cmd{border-left-color:var(--cyan)}
+pre.out{border-left-color:var(--amber)}
+code{color:var(--fg);background:rgba(255,255,255,.04);padding:1px 6px;border-radius:2px;font-size:.85em}
+pre code{background:none;padding:0;font-size:1em}
+.kw{color:var(--mag)}     .str{color:var(--green)}
+.flag{color:var(--amber)} .num{color:var(--amber)}
+.cmt{color:#506068;font-style:italic} .ok{color:var(--green)}
+.bad{color:var(--red)} .dim{color:var(--dim)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:18px 0}
+.stat{background:var(--panel);border:1px solid var(--line);padding:14px 18px;border-radius:3px}
+.stat .label{font-size:.65rem;color:var(--soft);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.stat .v{font-size:1.5rem;color:#fff;font-weight:700}
+.stat .v.good{color:var(--green)} .stat .v.bad{color:var(--red)}
+.stat .sub{font-size:.7rem;color:var(--dim);margin-top:4px}
+.arch{background:var(--panel);border:1px solid var(--line);padding:18px 24px;border-radius:3px;font-size:.74rem;color:var(--soft);white-space:pre;overflow-x:auto;margin:14px 0;line-height:1.7}
+.arch .box{color:var(--green)} .arch .arr{color:var(--dim)} .arch .lab{color:var(--cyan)}
+footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--line);font-size:.7rem;color:var(--dim);display:flex;gap:18px;flex-wrap:wrap}
+footer a{color:var(--soft)} footer a:hover{color:var(--green)}
+.note{border-left:2px solid var(--amber);padding:8px 14px;background:rgba(230,168,0,.04);font-size:.78rem;color:var(--soft);margin:12px 0;border-radius:0 2px 2px 0}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:720px){.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Repo2RLEnv <span class="x">×</span> crabbox <span class="x">×</span> islo.dev</h1>
+  <p class="tagline">Score Repo2RLEnv <code>pr_diff</code> tasks on a remote islo.dev sandbox via crabbox. ~50s end-to-end per task. Parallel batch over a whole dataset with one flag.</p>
+  <div class="badges">
+    <span class="badge live">● live · verified May 2026</span>
+    <span class="badge"><a href="https://github.com/huggingface/Repo2RLEnv/pull/53">PR #53</a></span>
+    <span class="badge"><a href="https://github.com/huggingface/Repo2RLEnv">huggingface/Repo2RLEnv</a></span>
+    <span class="badge"><a href="https://github.com/openclaw/crabbox">openclaw/crabbox</a></span>
+    <span class="badge"><a href="https://islo.dev">islo.dev</a></span>
+  </div>
+</header>
+
+<h2>What this is</h2>
+<p>Repo2RLEnv turns any GitHub repo into a verifiable RL training/eval dataset, emitted in <a href="https://github.com/harbor-framework/harbor">Harbor</a>'s task spec. Harbor's built-in runners are <code>{docker, modal, daytona, e2b, runloop}</code>. Crabbox is a separate control plane that fronts ~15 more providers — AWS, Azure, GCP, Hetzner, Proxmox, <strong>islo.dev</strong>, …</p>
+<p>This is the small adapter (one Python file, ~250 lines) that runs Repo2RLEnv's <code>pr_diff</code> tasks on any crabbox provider. Source: <a href="https://github.com/huggingface/Repo2RLEnv/blob/main/examples/crabbox-islo/runner.py"><code>examples/crabbox-islo/runner.py</code></a> in PR #53.</p>
+
+<h2>Pipeline</h2>
+<div class="arch">  <span class="lab">host</span>                                                <span class="lab">islo.dev sandbox</span>
+  <span class="box">┌─ runner.py ──────────────────┐</span>     <span class="arr">sync</span>     <span class="box">┌─ python:3.12-slim ─────────┐</span>
+  <span class="box">│</span> parse task.toml             <span class="box">│</span>    <span class="arr">─────►</span>    <span class="box">│</span> apt-get install git        <span class="box">│</span>
+  <span class="box">│</span> extract verifier from       <span class="box">│</span>              <span class="box">│</span> git clone &lt;repo&gt; /repo      <span class="box">│</span>
+  <span class="box">│</span>   environment/Dockerfile    <span class="box">│</span>              <span class="box">│</span> git reset --hard &lt;ref&gt;      <span class="box">│</span>
+  <span class="box">│</span> stage agent.diff +          <span class="box">│</span>              <span class="box">│</span> git apply agent.diff        <span class="box">│</span>
+  <span class="box">│</span>   verifier/* + test.sh      <span class="box">│</span>              <span class="box">│</span> bash tests/test.sh          <span class="box">│</span>
+  <span class="box">│</span> git init (crabbox needs it) <span class="box">│</span>    <span class="arr">◄─────</span>    <span class="box">│</span> echo SENTINEL                <span class="box">│</span>
+  <span class="box">│</span> crabbox run --provider islo <span class="box">│</span>    <span class="arr">stdout</span>    <span class="box">│</span> cat /logs/verifier/         <span class="box">│</span>
+  <span class="box">│</span> parse reward.json from pipe <span class="box">│</span>              <span class="box">│</span>     reward.json             <span class="box">│</span>
+  <span class="box">└──────────────────────────────┘</span>              <span class="box">└────────────────────────────┘</span>
+</div>
+
+<h2>Live runs · pallets/click on islo.dev</h2>
+
+<div class="grid">
+  <div class="stat"><div class="label">Single task · oracle</div><div class="v good">1.0</div><div class="sub">~51s wall · expected ≈ 1.0</div></div>
+  <div class="stat"><div class="label">Single task · empty diff</div><div class="v bad">0.0</div><div class="sub">~50s · agent gave up → baseline</div></div>
+  <div class="stat"><div class="label">Batch · 3 tasks, j=3</div><div class="v good">1.0</div><div class="sub">~57s wall (3× parallel)</div></div>
+</div>
+
+<h3>1 · pull a published dataset</h3>
+<pre class="cmd"><span class="kw">repo2rlenv</span> pull AdithyaSK/repo2rlenv-pr-diff ./datasets/pr-diff
+<span class="cmt"># 161 pr_diff tasks across ripgrep · click · chalk · axios · ...</span></pre>
+
+<h3>2 · score the oracle diff (sanity check)</h3>
+<pre class="cmd">python3 examples/crabbox-islo/runner.py ./datasets/pr-diff/pallets__click-3466</pre>
+<pre class="out">[crabbox] default/pallets__click-3466 provider=islo image=python:3.12-slim
+<span class="dim">leased isb_crabbox-tmp-...-cafe98 slug=violet-crayfish provider=islo</span>
+<span class="dim">sync candidate: 5 files, 24.5 KiB  ·  sync complete in 1.014s</span>
++ git clone --filter=blob:none https://github.com/pallets/click.git /repo
++ git reset --hard b8b9ffeb5d012f5d041685c81152636bf596cf72
++ git apply --whitespace=nowarn /workspace/task/agent.diff
++ bash /tmp/test.sh
+<span class="ok">{
+  "final_reward": <span class="num">1.0</span>,
+  "components": {
+    "format_valid":   <span class="num">1.0</span>,
+    "size_sanity":    <span class="num">1.0</span>,
+    "file_targeting": <span class="num">1.0</span>,
+    "region_overlap": <span class="num">1.0</span>,
+    "similarity":     <span class="num">1.0</span>,
+    "llm_judge":      null
+  }
+}</span>
+<span class="dim">islo run summary  sync=1.014s  command=4.888s  total=51.336s  exit=0</span></pre>
+
+<h3>3 · score an empty agent diff (agent gave up)</h3>
+<pre class="cmd">: <span class="dim">&gt; /tmp/empty.diff</span>                              <span class="cmt"># empty patch</span>
+python3 examples/crabbox-islo/runner.py ./datasets/pr-diff/pallets__click-3466 \
+  <span class="flag">--agent-patch</span> /tmp/empty.diff \
+  <span class="flag">--reward-out</span>  /tmp/empty-reward.json</pre>
+<pre class="out"><span class="bad">{
+  "final_reward": <span class="num">0.0</span>,
+  "components": {
+    "format_valid":   <span class="num">0.0</span>,
+    "size_sanity":    <span class="num">0.0</span>,
+    "file_targeting": <span class="num">0.0</span>,
+    "region_overlap": <span class="num">0.0</span>,
+    "similarity":     <span class="num">0.0</span>,
+    "llm_judge":      null
+  }
+}</span></pre>
+
+<h3>4 · whole dataset, parallel (3 tasks, j=3)</h3>
+<pre class="cmd">python3 examples/crabbox-islo/runner.py <span class="flag">--all</span> ./datasets/pr-diff <span class="flag">-j</span> 3</pre>
+<pre class="out"><span class="dim">[batch] 3 tasks; j=3; provider=islo</span>
+[batch] pallets__click-3444                  reward=<span class="ok">   1.0</span>  ok
+[batch] pallets__click-3466                  reward=<span class="ok">   1.0</span>  ok
+[batch] chalk__chalk-541                     reward=<span class="ok">   1.0</span>  ok
+[batch] wrote /Users/.../mini-dataset/rewards.csv
+
+<span class="dim">real    0m56.774s</span></pre>
+
+<pre class="out"><span class="cmt"># mini-dataset/rewards.csv</span>
+task,final_reward,status
+chalk__chalk-541,<span class="num">1.0</span>,ok
+pallets__click-3444,<span class="num">1.0</span>,ok
+pallets__click-3466,<span class="num">1.0</span>,ok</pre>
+
+<h2>One flag, many providers</h2>
+<p>The wrapper is provider-agnostic. The same script runs on AWS, Hetzner, Daytona, or any other crabbox target:</p>
+<pre class="cmd">python3 runner.py &lt;task&gt; <span class="flag">--provider</span> islo     <span class="cmt"># default</span>
+python3 runner.py &lt;task&gt; <span class="flag">--provider</span> aws      <span class="cmt"># brokered EC2 Linux</span>
+python3 runner.py &lt;task&gt; <span class="flag">--provider</span> hetzner  <span class="cmt"># cheap & fast Linux VMs</span>
+python3 runner.py &lt;task&gt; <span class="flag">--provider</span> daytona  <span class="cmt"># SSH-gateway sandboxes</span>
+python3 runner.py &lt;task&gt; <span class="flag">--provider</span> local-container  <span class="cmt"># laptop Docker — no cloud</span></pre>
+
+<div class="note"><strong>Scope.</strong> Supported today: every task in <a href="https://huggingface.co/datasets/AdithyaSK/repo2rlenv-pr-diff"><code>AdithyaSK/repo2rlenv-pr-diff</code></a> (161 tasks). Pipelines like <code>pr_runtime</code> and <code>commit_runtime</code> build a per-repo Docker image at <code>repo2rlenv bootstrap</code> time and need docker-in-docker — wiring those through crabbox is a follow-up.</div>
+
+<h2>Why this matters</h2>
+<p>Repo2RLEnv's stated focus is <em>synthesis</em>; running is delegated to Harbor's stack. Crabbox extends the runtime reach without modifying either project — Harbor for the in-stack runners, crabbox for the providers Harbor doesn't ship a backend for. Generate once, run anywhere.</p>
+
+<footer>
+  <a href="https://github.com/huggingface/Repo2RLEnv/pull/53">PR #53</a>
+  <a href="https://github.com/huggingface/Repo2RLEnv/blob/main/examples/crabbox-islo/runner.py">runner.py</a>
+  <a href="https://github.com/huggingface/Repo2RLEnv">huggingface/Repo2RLEnv</a>
+  <a href="https://github.com/openclaw/crabbox">openclaw/crabbox</a>
+  <a href="https://github.com/harbor-framework/harbor">harbor-framework/harbor</a>
+  <a href="https://islo.dev">islo.dev</a>
+  <span style="margin-left:auto;color:var(--dim)">verified May 2026 on a live islo.dev sandbox</span>
+</footer>
+
+</body>
+</html>
