@@ -3,13 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Repo2RLEnv × crabbox × islo.dev</title>
-<meta name="description" content="Score Repo2RLEnv pr_diff tasks on a remote islo.dev sandbox via crabbox — ~50s end-to-end per task.">
+<title>Repo2RLEnv × crabbox × islo.dev demo · Yossi Eliaz</title>
+<meta name="description" content="Demo record (May 2026) by Yossi Eliaz: an adapter that scores Repo2RLEnv pr_diff tasks on an islo.dev sandbox via openclaw/crabbox, ~50 s per task.">
+<meta name="author" content="Yossi Eliaz">
+<link rel="canonical" href="https://zozo123.github.io/repo2rlenv-crabbox-demo/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Repo2RLEnv × crabbox × islo.dev demo · Yossi Eliaz">
+<meta property="og:description" content="Demo record (May 2026) by Yossi Eliaz: an adapter that scores Repo2RLEnv pr_diff tasks on an islo.dev sandbox via openclaw/crabbox, ~50 s per task.">
+<meta property="og:url" content="https://zozo123.github.io/repo2rlenv-crabbox-demo/">
+<meta property="og:image" content="https://zozo123.github.io/repo2rlenv-crabbox-demo/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Repo2RLEnv × crabbox × islo.dev · Demo record, May 2026 · Yossi Eliaz">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Repo2RLEnv × crabbox × islo.dev demo · Yossi Eliaz">
+<meta name="twitter:description" content="Demo record (May 2026): an adapter that scores Repo2RLEnv pr_diff tasks on an islo.dev sandbox via openclaw/crabbox, ~50 s per task.">
+<meta name="twitter:image" content="https://zozo123.github.io/repo2rlenv-crabbox-demo/og.png">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"Repo2RLEnv × crabbox × islo.dev demo","description":"Demo record (May 2026): an adapter that scores Repo2RLEnv pr_diff tasks on an islo.dev sandbox via openclaw/crabbox, about 50 s per task.","url":"https://zozo123.github.io/repo2rlenv-crabbox-demo/","image":"https://zozo123.github.io/repo2rlenv-crabbox-demo/og.png","datePublished":"2026-05-28","dateModified":"2026-10-22","author":{"@type":"Person","name":"Yossi Eliaz","url":"https://yossieliaz.netlify.app/","sameAs":["https://github.com/zozo123","https://www.linkedin.com/in/yossi-eliaz/"]},"isBasedOn":"https://github.com/zozo123/Repo2RLEnv/blob/727d33f9416936b14d14a5e3fd1e351d61fb9bee/examples/crabbox/runner.py","about":[{"@type":"SoftwareSourceCode","name":"Repo2RLEnv","codeRepository":"https://github.com/huggingface/Repo2RLEnv"},{"@type":"SoftwareSourceCode","name":"crabbox","codeRepository":"https://github.com/openclaw/crabbox"}]}
+</script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
 :root{
   --bg:#050508; --panel:#0a0a0e; --line:rgba(255,255,255,.06);
-  --fg:#b0b8c0; --dim:#3a3f48; --soft:#6a7280;
+  --fg:#b0b8c0; --dim:#7a828c; --soft:#8b94a0;
   --green:#00e05a; --amber:#e6a800; --cyan:#0cf; --mag:#c09; --red:#e63946;
 }
 *{margin:0;padding:0;box-sizing:border-box}
@@ -24,9 +41,15 @@ h2{font-size:.95rem;font-weight:700;color:var(--green);letter-spacing:.04em;text
 h3{font-size:.85rem;font-weight:700;color:var(--amber);letter-spacing:.06em;text-transform:uppercase;margin:24px 0 10px}
 p{margin-bottom:14px;max-width:78ch}
 .tagline{color:var(--soft);font-size:.85rem;margin-top:8px;max-width:78ch}
-.badges{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;font-size:.7rem}
-.badge{display:inline-block;padding:3px 8px;border:1px solid var(--dim);color:var(--soft);border-radius:2px;letter-spacing:.04em}
-.badge.live{border-color:var(--green);color:var(--green)}
+.lede{color:var(--fg);font-size:.9rem;margin-top:10px;max-width:78ch}
+.byline a{color:var(--fg)}
+.badges{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;font-size:.8rem}
+.badge{display:inline-block;padding:6px 10px;border:1px solid var(--dim);color:var(--soft);border-radius:2px;letter-spacing:.04em;line-height:1.4}
+a.badge{color:var(--cyan);border:1px solid var(--dim)}
+a.badge:hover{color:var(--green);border-color:var(--green)}
+.badge.rec{border-color:var(--green);color:var(--green)}
+.tscroll{overflow-x:auto;margin:14px 0}
+.tscroll table.ptbl{margin:0}
 pre{background:var(--panel);border:1px solid var(--line);border-left:2px solid var(--green);padding:14px 18px;font-size:.78rem;line-height:1.55;overflow-x:auto;margin:14px 0;border-radius:0 3px 3px 0}
 pre.cmd{border-left-color:var(--cyan)}
 pre.out{border-left-color:var(--amber)}
@@ -45,7 +68,7 @@ pre code{background:none;padding:0;font-size:1em}
 .arch{background:var(--panel);border:1px solid var(--line);padding:18px 24px;border-radius:3px;font-size:.74rem;color:var(--soft);white-space:pre;overflow-x:auto;margin:14px 0;line-height:1.7}
 .arch .box{color:var(--green)} .arch .arr{color:var(--dim)} .arch .lab{color:var(--cyan)}
 footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--line);font-size:.7rem;color:var(--dim);display:flex;gap:18px;flex-wrap:wrap}
-footer a{color:var(--soft)} footer a:hover{color:var(--green)}
+footer a{color:var(--soft)} footer a:hover{color:var(--green)} footer .meta{margin-left:auto}
 .note{border-left:2px solid var(--amber);padding:8px 14px;background:rgba(230,168,0,.04);font-size:.78rem;color:var(--soft);margin:12px 0;border-radius:0 2px 2px 0}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media (max-width:720px){.row{grid-template-columns:1fr}}
@@ -62,19 +85,22 @@ table.ptbl code{font-size:.85em}
 
 <header>
   <h1>Repo2RLEnv <span class="x">×</span> crabbox <span class="x">×</span> islo.dev</h1>
-  <p class="tagline">Score Repo2RLEnv <code>pr_diff</code> tasks on a remote islo.dev sandbox via crabbox. ~50s end-to-end per task. Parallel batch over a whole dataset with one flag.</p>
+  <p class="lede">This page records a May 2026 demo by Yossi Eliaz: a single-file Python adapter that runs Repo2RLEnv <code>pr_diff</code> tasks on an islo.dev sandbox through openclaw/crabbox. On pallets/click the oracle diff scored 1.0 and an empty diff 0.0, about 50 s per task; a 3-task batch finished in about 57 s. The upstream PR was not merged.</p>
+  <p class="tagline byline">By <a href="https://yossieliaz.netlify.app/">Yossi Eliaz</a> · May 2026 · <a href="https://zozo123.github.io/">More writing &amp; experiments</a></p>
   <div class="badges">
-    <span class="badge live">● live · verified May 2026</span>
-    <span class="badge"><a href="https://github.com/huggingface/Repo2RLEnv/pull/53">PR #53</a></span>
-    <span class="badge"><a href="https://github.com/huggingface/Repo2RLEnv">huggingface/Repo2RLEnv</a></span>
-    <span class="badge"><a href="https://github.com/openclaw/crabbox">openclaw/crabbox</a></span>
-    <span class="badge"><a href="https://islo.dev">islo.dev</a></span>
+    <span class="badge rec">recorded May 2026</span>
+    <a class="badge" href="https://github.com/huggingface/Repo2RLEnv/pull/53">PR #53 (closed)</a>
+    <a class="badge" href="https://github.com/huggingface/Repo2RLEnv">huggingface/Repo2RLEnv</a>
+    <a class="badge" href="https://github.com/openclaw/crabbox">openclaw/crabbox</a>
+    <a class="badge" href="https://islo.dev">islo.dev</a>
   </div>
 </header>
 
+<div class="note"><strong>Status.</strong> <a href="https://github.com/huggingface/Repo2RLEnv/pull/53">huggingface/Repo2RLEnv#53</a> was closed without merging in June 2026; Repo2RLEnv stays synthesis-only and leaves execution to Harbor. The runner remains on the <a href="https://github.com/zozo123/Repo2RLEnv/blob/727d33f9416936b14d14a5e3fd1e351d61fb9bee/examples/crabbox/runner.py">zozo123/Repo2RLEnv fork</a>. Results below are from May 2026 runs.</div>
+
 <h2>What this is</h2>
-<p>Repo2RLEnv turns any GitHub repo into a verifiable RL training/eval dataset, emitted in <a href="https://github.com/harbor-framework/harbor">Harbor</a>'s task spec. Harbor's built-in runners are <code>{docker, modal, daytona, e2b, runloop}</code>. Crabbox is a separate control plane that fronts ~15 more providers — AWS, Azure, GCP, Hetzner, Proxmox, <strong>islo.dev</strong>, …</p>
-<p>This is the small adapter (one Python file, ~250 lines) that runs Repo2RLEnv's <code>pr_diff</code> tasks on any crabbox provider. Source: <a href="https://github.com/huggingface/Repo2RLEnv/blob/main/examples/crabbox/runner.py"><code>examples/crabbox/runner.py</code></a> in PR #53.</p>
+<p>Repo2RLEnv turns any GitHub repo into a verifiable RL training/eval dataset, emitted in <a href="https://github.com/harbor-framework/harbor">Harbor</a>'s task spec. Harbor's built-in runners are <code>{docker, modal, daytona, e2b, runloop}</code>. Crabbox is a separate control plane that fronts many more providers (see the <a href="https://github.com/openclaw/crabbox#providers">crabbox provider list</a>), including AWS, Azure, GCP, Hetzner, Proxmox and <strong>islo.dev</strong>.</p>
+<p>This is a small single-file Python adapter that runs Repo2RLEnv's <code>pr_diff</code> tasks on any supported crabbox provider. Source: <a href="https://github.com/zozo123/Repo2RLEnv/blob/727d33f9416936b14d14a5e3fd1e351d61fb9bee/examples/crabbox/runner.py"><code>examples/crabbox/runner.py</code></a> on the zozo123/Repo2RLEnv fork (the head of the closed PR #53).</p>
 
 <h2>Pipeline</h2>
 <div class="arch">  <span class="lab">host</span>                                                <span class="lab">islo.dev sandbox</span>
@@ -90,7 +116,7 @@ table.ptbl code{font-size:.85em}
   <span class="box">└──────────────────────────────┘</span>              <span class="box">└────────────────────────────┘</span>
 </div>
 
-<h2>Live runs · pallets/click on islo.dev</h2>
+<h2>Recorded runs (May 2026) · pallets/click on islo.dev</h2>
 
 <div class="grid">
   <div class="stat"><div class="label">Single task · oracle</div><div class="v good">1.0</div><div class="sub">~51s wall · expected ≈ 1.0</div></div>
@@ -160,6 +186,7 @@ pallets__click-3466,<span class="num">1.0</span>,ok</pre>
 <h2>One flag, eight providers</h2>
 <p>Each crabbox provider names its <em>image</em> flag differently — islo and modal use <code>--&lt;p&gt;-image</code>, e2b uses <code>--e2b-template</code>, daytona uses <code>--daytona-snapshot</code>, local-container uses <code>--local-container-image</code> with a <code>-work-root</code>. The wrapper carries an explicit <code>PROVIDER_CONFIG</code> table so the right flag is selected per provider:</p>
 
+<div class="tscroll">
 <table class="ptbl">
   <thead><tr><th><code>--provider</code></th><th>sandbox kind</th><th>image flag</th><th>unit</th><th>live</th></tr></thead>
   <tbody>
@@ -173,6 +200,7 @@ pallets__click-3466,<span class="num">1.0</span>,ok</pre>
     <tr><td><code>tensorlake</code></td><td>Tensorlake</td><td><code>--tensorlake-image</code></td><td class="ok">✓</td><td>—</td></tr>
   </tbody>
 </table>
+</div>
 
 <pre class="cmd">python3 runner.py &lt;task&gt; <span class="flag">--provider</span> islo            <span class="cmt"># default · live-verified</span>
 python3 runner.py &lt;task&gt; <span class="flag">--provider</span> e2b             <span class="cmt"># --e2b-template instead of --e2b-image</span>
@@ -209,24 +237,24 @@ test_run_task_raises_when_no_sentinel_in_stdout                    PASSED</span>
   (ISLO_API_KEY not set — live islo.dev smoke is opt-in)</span>
 <span class="ok">======================== 15 passed, 1 skipped in 1.07s ========================</span></pre>
 
-<p><strong>Unit tests</strong> (always run in CI) monkeypatch <code>subprocess.run</code> and assert the exact <code>crabbox</code> argv built for every supported provider — no network, no binary. <strong>The live islo smoke</strong> pulls <code>pallets__click-3466</code> from the public reference dataset, scores the oracle, and asserts <code>final_reward == 1.0</code>. It runs only when both <code>ISLO_API_KEY</code> is set and <code>crabbox</code> is on <code>PATH</code>:</p>
+<p><strong>Unit tests</strong> (no credentials needed) monkeypatch <code>subprocess.run</code> and assert the exact <code>crabbox</code> argv built for every supported provider — no network, no binary. <strong>The live islo smoke</strong> pulls <code>pallets__click-3466</code> from the public reference dataset, scores the oracle, and asserts <code>final_reward == 1.0</code>. It runs only when both <code>ISLO_API_KEY</code> is set and <code>crabbox</code> is on <code>PATH</code>:</p>
 
 <pre class="cmd">ISLO_API_KEY=ak_... uv run pytest tests/test_examples_crabbox.py \
   -k live_islo -v</pre>
 
 <div class="note"><strong>Scope.</strong> Supported today: every <code>pr_diff</code> task in <a href="https://huggingface.co/datasets/AdithyaSK/repo2rlenv-pr-diff"><code>AdithyaSK/repo2rlenv-pr-diff</code></a> (161 tasks). Pipelines like <code>pr_runtime</code> and <code>commit_runtime</code> build a per-repo Docker image at <code>repo2rlenv bootstrap</code> time and need docker-in-docker — wiring those through crabbox is a follow-up.</div>
 
-<h2>Why this matters</h2>
-<p>Repo2RLEnv's stated focus is <em>synthesis</em>; running is delegated to Harbor's stack. Crabbox extends the runtime reach without modifying either project — Harbor for the in-stack runners, crabbox for the providers Harbor doesn't ship a backend for. Generate once, run anywhere.</p>
+<h2>Design note</h2>
+<p>Repo2RLEnv's stated focus is <em>synthesis</em>; running is delegated to Harbor's stack. Crabbox extends the runtime reach without modifying either project — Harbor for the in-stack runners, crabbox for the providers Harbor doesn't ship a backend for.</p>
 
 <footer>
-  <a href="https://github.com/huggingface/Repo2RLEnv/pull/53">PR #53</a>
-  <a href="https://github.com/huggingface/Repo2RLEnv/blob/main/examples/crabbox/runner.py">runner.py</a>
+  <a href="https://github.com/huggingface/Repo2RLEnv/pull/53">PR #53 (closed)</a>
+  <a href="https://github.com/zozo123/Repo2RLEnv/blob/727d33f9416936b14d14a5e3fd1e351d61fb9bee/examples/crabbox/runner.py">runner.py (fork)</a>
   <a href="https://github.com/huggingface/Repo2RLEnv">huggingface/Repo2RLEnv</a>
   <a href="https://github.com/openclaw/crabbox">openclaw/crabbox</a>
   <a href="https://github.com/harbor-framework/harbor">harbor-framework/harbor</a>
   <a href="https://islo.dev">islo.dev</a>
-  <span style="margin-left:auto;color:var(--dim)">verified May 2026 on a live islo.dev sandbox</span>
+  <span class="meta">Recorded May 2026 on an islo.dev sandbox · <a href="https://yossieliaz.netlify.app/">Yossi Eliaz</a> · <a href="https://zozo123.github.io/">zozo123.github.io</a></span>
 </footer>
 
 </body>
